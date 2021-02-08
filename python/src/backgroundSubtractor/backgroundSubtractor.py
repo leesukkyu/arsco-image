@@ -6,6 +6,7 @@ import numpy as np
 from matplotlib import pyplot as plt
 
 # [설정]
+IS_CAM = True
 ALGORITHM = 'MOG2'  # 알고리즘 선택 MOG2 | KNN
 BACKGROUND_PATH = '/Users/user/Desktop/git/arsco-image/python/src/backgroundSubtractor/1.jpg'  # 기본 이미지
 FOREGROUND_PATH = '/Users/user/Desktop/git/arsco-image/python/src/backgroundSubtractor/2.jpg'  # 기본 이미지
@@ -48,18 +49,17 @@ def imageProcessing(img):  # 이미지 처리
     return img
 
 
-def detectObject(img):  # 결과물에 오브젝트가 있는지 검사
+def detectObject(img, normalImg):  # 결과물에 오브젝트가 있는지 검사
     contours, hierarchy = cv.findContours(
         img, cv.RETR_LIST, cv.CHAIN_APPROX_SIMPLE)
     print(len(contours))
-    result = cv.imread(FOREGROUND_PATH)
 
     for cnt in contours:
         x, y, w, h = cv.boundingRect(cnt)
         if w > 80:
-            cv.rectangle(result, (x, y), (x + w, y + h), (0, 255, 0), 2)
+            cv.rectangle(normalImg, (x, y), (x + w, y + h), (0, 255, 0), 2)
 
-    cv.imshow("2", result)
+    cv.imshow("2", normalImg)
 
 
 def init():  # 이미지 비디오 분석
@@ -80,7 +80,7 @@ def init():  # 이미지 비디오 분석
 
     # 보기
     cv.imshow('Mask', mask)
-    detectObject(mask)
+    detectObject(mask, foreground)
     cv.waitKey(100000)
 
 
@@ -106,11 +106,14 @@ def init2():  # 웹캠으로 비디오 분석
         # 보기
         cv.imshow('Frame', frame)
         cv.imshow('Mask', mask)
-        detectObject(mask)
+        detectObject(mask, frame)
 
         keyboard = cv.waitKey(30)  # 프레임 조절
         if keyboard == 'q' or keyboard == 27:
             break
 
 
-init()
+if(IS_CAM):
+    init2()
+else:
+    init()
